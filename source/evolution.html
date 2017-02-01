@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<!--
+Evolution, a samll piece of software by Hugo Aristizábal @carejunto.
+If you make any changes, please let me know so I can check the out! huguetex@gmail.com
+Fabric.js: http://fabricjs.com/
+Bostrap: http://getbootstrap.com
+-->
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title></title>
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+          crossorigin="anonymous">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2">
+                <h2>
+                    Evolution<small>Aristi</small>
+                </h2>
+                <div>
+                    <div class="form-group">
+                        <label for="generations">Generations</label>
+                        <input type="number" class="form-control" id="generations" placeholder="Generations" required="required" value="13">
+                    </div>
+                    <div class="form-group">
+                        <label for="degrees">Degrees</label>
+                        <input type="number" class="form-control" id="degrees" placeholder="Degrees" required="required" value="30">
+                    </div>
+                    <div class="form-group">
+                        <label for="lengthDelta">Initial Length</label>
+                        <input type="number" class="form-control" id="initialLength" placeholder="Initial Length" required="required" value="80">
+                    </div>
+                    <div class="form-group">
+                        <label for="lengthDelta">Length Delta</label>
+                        <input type="number" class="form-control" id="lengthDelta" placeholder="Length Delta" required="required" value="6">
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" id="useFabricJs">
+                            Use Fabric.js (slower)
+                        </label>
+                    </div>
+                    <button class="btn btn-default" onclick="evolve()">Generate Life Form</button>
+                </div>
+            </div>
+            <div class="col-md-10">
+                <br/>
+                <canvas id="evolution" width="1200" height="900" style="border: 1px solid #000"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.7.1/fabric.min.js"></script>
+    <script>
+        //////////////////////////////////////////////////////////////
+        //Variables (genes). These are the values to play around with.
+        //////////////////////////////////////////////////////////////
+        var generationsEntered;
+        var childrenAngle;
+        var initialLength;
+        var lengthDelta;
+        var useFabricJs;
+        //////////////////////////////////////////////////////////////
+
+        var anglesDelta = 20;
+        var totalGenerations = 0;
+
+        var canvas = new fabric.StaticCanvas('evolution');
+        var ctx = getContext();
+        var genes = [];
+
+        function evolve() {
+            //Tree's initial position in canvas
+            var x = 600;
+            var y = 600;
+
+            canvas.clear();
+
+            generationsEntered = Number(document.getElementById("generations").value);
+            childrenAngle = Number(document.getElementById("degrees").value);
+            initialLength = Number(document.getElementById("initialLength").value);
+            lengthDelta = Number(document.getElementById("lengthDelta").value);
+            useFabricJs = Number(document.getElementById("useFabricJs").checked);
+
+            //Initial vertical line
+            var line = dibujarLinea(x, y, 90, 0, initialLength);
+
+            totalGenerations = generationsEntered;
+            genes = [];
+
+            //Children generation
+            drawChildren(line, generationsEntered);
+
+            console.log(genes);
+        }
+
+        function getContext() {
+            var canvas = document.getElementById("evolution");
+            var ctx = canvas.getContext("2d");
+            return ctx;
+        }
+
+        function cleanCanvas() {
+            var canvas = document.getElementById("evolution");
+            var ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function getRandomColor() {
+            var letras = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letras[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function drawChildren(line, generations) {
+            if (generations > 0) {
+                var color = getRandomColor();
+                var indice = totalGenerations - generations;
+                //If no angle has been defined for current generation, do it according to delta
+                if (!genes[indice]) {
+                    var delta = Math.floor(Math.random() * (anglesDelta + anglesDelta * 2 - 1)) - anglesDelta;
+                    //childrenAngle += delta;
+                    genes[indice] = childrenAngle + delta;
+                }
+
+                generations--;
+
+                var waitTime = 50;
+
+                setTimeout(function() {
+                    var child1 = dibujarLinea(line.xFinal,
+                        line.yFinal,
+                        genes[indice],
+                        line.degrees,
+                        line.length - lengthDelta,
+                        color);
+                    drawChildren(child1, generations); 
+
+                    setTimeout(function() {
+                        var child2 = dibujarLinea(line.xFinal,
+                            line.yFinal,
+                            -genes[indice],
+                            line.degrees,
+                            line.length - lengthDelta,
+                            color);
+                        drawChildren(child2, generations);
+                    }, waitTime);
+
+                }, waitTime);
+            }
+        }
+
+        function dibujarLinea(x, y, degrees, referenceAngle, length, color) {
+            var newAngle = (referenceAngle - degrees) % 360;
+
+
+            var radians = newAngle * Math.PI / 180;
+            //Calculate final position
+            var xf = x + length * Math.cos(radians);
+            var yf = y + length * Math.sin(radians);
+
+            if (!color) {
+                color = "#000";
+            }
+
+            if (useFabricJs) {
+                //Draw line with FabricJS
+                var line = new window.fabric.Line([x, y, xf, yf], {
+                    //angle: newAngle,
+                    width: 5,
+                    stroke: color
+                });
+                canvas.add(line);
+            } else {
+                //Draw regular line
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(xf, yf);
+                ctx.strokeStyle = color;
+                ctx.stroke();
+            }
+
+            return {
+                xInicial: x,
+                yInicial: y,
+                xFinal: xf,
+                yFinal: yf,
+                length: length,
+                degrees: newAngle
+            }
+        }
+    </script>
+</body>
+</html>
