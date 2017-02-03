@@ -6,9 +6,9 @@ var childrenAngle;
 var initialLength;
 var lengthDelta;
 var useFabricJs;
+var anglesDelta;
 //////////////////////////////////////////////////////////////
 
-var anglesDelta = 20;
 var totalGenerations = 0;
 
 var canvas = new fabric.StaticCanvas('evolution');
@@ -24,6 +24,7 @@ function evolve() {
 
     generationsEntered = Number(document.getElementById("generations").value);
     childrenAngle = Number(document.getElementById("degrees").value);
+    anglesDelta = Number(document.getElementById("degreesDelta").value);
     initialLength = Number(document.getElementById("initialLength").value);
     lengthDelta = Number(document.getElementById("lengthDelta").value);
     useFabricJs = Number(document.getElementById("useFabricJs").checked);
