@@ -10,27 +10,25 @@ var anglesDelta;
 //////////////////////////////////////////////////////////////
 
 var totalGenerations = 0;
-
-var canvas = new fabric.StaticCanvas('evolution');
 var ctx = getContext();
 var genes = [];
 
 function evolve() {
+
+    cleanCanvas();
+
     //Tree's initial position in canvas
     var x = 600;
     var y = 600;
-
-    canvas.clear();
 
     generationsEntered = Number(document.getElementById("generations").value);
     childrenAngle = Number(document.getElementById("degrees").value);
     anglesDelta = Number(document.getElementById("degreesDelta").value);
     initialLength = Number(document.getElementById("initialLength").value);
     lengthDelta = Number(document.getElementById("lengthDelta").value);
-    useFabricJs = Number(document.getElementById("useFabricJs").checked);
 
     //Initial vertical line
-    var line = dibujarLinea(x, y, 90, 0, initialLength);
+    var line = drawLine(x, y, 90, 0, initialLength);
 
     totalGenerations = generationsEntered;
     genes = [];
@@ -78,18 +76,17 @@ function drawChildren(line, generations) {
         var waitTime = 50;
 
         setTimeout(function() {
-            var child1 = dibujarLinea(line.xFinal,
+            var child1 = drawLine(line.xFinal,
                 line.yFinal,
                 genes[index],
                 line.degrees,
                 line.length - lengthDelta,
                 color);
-            drawChildren(child1, generations); 
+            drawChildren(child1, generations);
 
             setTimeout(function() {
-                var child2 = dibujarLinea(line.xFinal,
-                    line.yFinal,
-                    -genes[index],
+                var child2 = drawLine(line.xFinal,
+                    line.yFinal, -genes[index],
                     line.degrees,
                     line.length - lengthDelta,
                     color);
@@ -100,7 +97,7 @@ function drawChildren(line, generations) {
     }
 }
 
-function dibujarLinea(x, y, degrees, referenceAngle, length, color) {
+function drawLine(x, y, degrees, referenceAngle, length, color) {
     var newAngle = (referenceAngle - degrees) % 360;
 
 
@@ -113,22 +110,11 @@ function dibujarLinea(x, y, degrees, referenceAngle, length, color) {
         color = "#000";
     }
 
-    if (useFabricJs) {
-        //Draw line with FabricJS
-        var line = new window.fabric.Line([x, y, xf, yf], {
-            //angle: newAngle,
-            width: 5,
-            stroke: color
-        });
-        canvas.add(line);
-    } else {
-        //Draw regular line
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(xf, yf);
-        ctx.strokeStyle = color;
-        ctx.stroke();
-    }
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(xf, yf);
+    ctx.strokeStyle = color;
+    ctx.stroke();
 
     return {
         xInitial: x,

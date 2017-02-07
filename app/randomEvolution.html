@@ -3,19 +3,17 @@
 <!--
 Evolution, a samll piece of software by Hugo Aristizábal @carejunto.
 If you make any changes, please let me know so I can check the out! huguetex@gmail.com
-Fabric.js: http://fabricjs.com/
 Bostrap: http://getbootstrap.com
 -->
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title></title>
-    <link rel="stylesheet"
-          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
-          crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
 </head>
+
 <body>
     <div class="container-fluid">
         <div class="row">
@@ -44,12 +42,6 @@ Bostrap: http://getbootstrap.com
                         <label for="lengthDelta">Length Delta</label>
                         <input type="number" class="form-control" id="lengthDelta" placeholder="Length Delta" required="required" value="6">
                     </div>
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" id="useFabricJs">
-                            Use Fabric.js (slower)
-                        </label>
-                    </div>
                     <button class="btn btn-default" onclick="evolve()">Generate Life Form</button>
                 </div>
             </div>
@@ -60,7 +52,7 @@ Bostrap: http://getbootstrap.com
         </div>
     </div>
 
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.7.1/fabric.min.js"></script>
-    <script src="evolution.js"></script>
+    <script src="js/evolution.js"></script>
 </body>
+
 </html>
