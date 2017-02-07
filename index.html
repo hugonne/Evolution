@@ -3,17 +3,125 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title></title>
+    <title>Evolution</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <style>
+        * {
+            padding: 0;
+            margin: 0
+        }
+    </style>
 </head>
 
 <body>
-    <div class="container-fluid">
-        <h2>
-            Evolution<small>Aristi</small>
-        </h2>
-        <a href="app/randomEvolution.html">Random Evolution</a>
-    </div>
+    <script src="app/js/lib/pixi.min.js"></script>
+    <script type="text/javascript">
+        //Init
+        ////////////////////////////
+
+        //Aliases
+        var Container = PIXI.Container,
+            autoDetectRenderer = PIXI.autoDetectRenderer,
+            loader = PIXI.loader,
+            resources = PIXI.loader.resources,
+            Sprite = PIXI.Sprite,
+            TextureCache = PIXI.TextureCache,
+            Rectangle = PIXI.Rectangle,
+            utils = PIXI.utils;
+
+        var width = window.innerWidth; //document.body.clientWidth
+        var height = window.innerHeight; //document.body.clientHeight
+        var center = {
+            x: Math.round(width / 2),
+            y: Math.round(height / 2)
+        };
+        var scale = width / 1920;
+        if (scale * 108 < height) {
+            scale = height / 1080;
+        }
+
+        //Create the renderer
+        var renderer = autoDetectRenderer(1, 1, {
+            antialias: true,
+            transparent: true,
+            resolution: 1
+        });
+
+        renderer.view.style.border = "1px solid green";
+        //renderer.backgroundColor = 0x061639;
+        renderer.view.style.position = "absolute";
+        renderer.view.style.display = "block";
+        renderer.autoResize = true;
+        renderer.resize(width, height);
+
+        //Add canvas to document
+        document.body.appendChild(renderer.view);
+        //Creat container object (stage)
+        var stage = new Container();
+
+        ////////////////////////////
+
+        //Load game images as resources
+        loader
+            .add("/app/img/cat.png")
+            .add("/app/img/line.png")
+            .add("/app/img/tileset.png")
+            .on("progress", loadProgressHandler)
+            .load(setup);
+
+        function loadProgressHandler(loader, resource) {
+            console.log("Loading " + resource.url + ": " + loader.progress + "%");
+        }
+
+        function setup() {
+            //Create Sprite from loaded resource
+            var cat = new Sprite(loader.resources["/app/img/cat.png"].texture);
+            cat.x = 96;
+            cat.y = 96;
+            cat.rotation = 0.5;
+            var cat2 = new Sprite(loader.resources["/app/img/cat.png"].texture);
+
+            var line = new Sprite(loader.resources["/app/img/line.png"].texture);
+            var line1 = new Sprite(loader.resources["/app/img/line.png"].texture);
+            var line2 = new Sprite(loader.resources["/app/img/line.png"].texture);
+            line.position.set(width / 2, height / 2);
+            line1.position.set(width / 2, height / 2);
+            line2.position.set(width / 2, height / 2);
+            line.height = 400;
+            line1.height = 400;
+            line2.height = 400;
+            line1.rotation = 0.5;
+            line2.rotation = 0.75;
+
+            var texture = loader.resources["/app/img/tileset.png"].texture; //TextureCache["/app/img//tileset.png"];
+
+            //Create a rectangle object that defines the position and
+            //size of the sub-image you want to extract from the texture
+            var rectangle = new Rectangle(96, 64, 32, 32);
+            //Tell the texture to use that rectangular section
+            texture.frame = rectangle;
+            //Create the sprite from the texture
+            var rocket = new Sprite(texture);
+            //Position the rocket sprite on the canvas
+            rocket.x = 232;
+            rocket.y = 232;
+            //Add the rocket to the stage
+
+            stage.addChild(cat);
+            stage.addChild(cat2);
+            stage.addChild(line);
+            stage.addChild(line1);
+            stage.addChild(line2);
+            stage.addChild(rocket);
+
+            console.log("Done loading");
+
+            //Render the stage
+            renderer.render(stage);
+        }
+    </script>
 </body>
 
 </html>
