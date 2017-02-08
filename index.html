@@ -7,119 +7,118 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <style>
-        * {
-            padding: 0;
-            margin: 0
-        }
-    </style>
 </head>
 
 <body>
     <script src="app/js/lib/pixi.min.js"></script>
-    <script type="text/javascript">
-        //Init
-        ////////////////////////////
-
+    <script src="app/js/utils.js"></script>
+    <script>
         //Aliases
         var Container = PIXI.Container,
             autoDetectRenderer = PIXI.autoDetectRenderer,
             loader = PIXI.loader,
             resources = PIXI.loader.resources,
-            Sprite = PIXI.Sprite,
-            TextureCache = PIXI.TextureCache,
-            Rectangle = PIXI.Rectangle,
-            utils = PIXI.utils;
+            TextureCache = PIXI.utils.TextureCache,
+            Texture = PIXI.Texture,
+            Sprite = PIXI.Sprite;
 
-        var width = window.innerWidth; //document.body.clientWidth
-        var height = window.innerHeight; //document.body.clientHeight
-        var center = {
-            x: Math.round(width / 2),
-            y: Math.round(height / 2)
-        };
-        var scale = width / 1920;
-        if (scale * 108 < height) {
-            scale = height / 1080;
-        }
-
-        //Create the renderer
-        var renderer = autoDetectRenderer(1, 1, {
-            antialias: true,
-            transparent: true,
-            resolution: 1
-        });
-
-        renderer.view.style.border = "1px solid green";
-        //renderer.backgroundColor = 0x061639;
-        renderer.view.style.position = "absolute";
-        renderer.view.style.display = "block";
-        renderer.autoResize = true;
-        renderer.resize(width, height);
-
-        //Add canvas to document
+        //Create a Pixi stage and renderer and add the renderer.view to the DOM
+        var stage = new Container(),
+            renderer = autoDetectRenderer(512, 512);
         document.body.appendChild(renderer.view);
-        //Creat container object (stage)
-        var stage = new Container();
 
-        ////////////////////////////
-
-        //Load game images as resources
+        //Load a JSON file and run the 'setup' function when it's done
         loader
-            .add("/app/img/cat.png")
-            .add("/app/img/line.png")
-            .add("/app/img/tileset.png")
-            .on("progress", loadProgressHandler)
+            .add("/app/img/treasureHunter.json")
             .load(setup);
 
-        function loadProgressHandler(loader, resource) {
-            console.log("Loading " + resource.url + ": " + loader.progress + "%");
-        }
+        //Define variables that might be used in more than one function
+        var dungeon, explorer, treasure, door, id;
 
         function setup() {
-            //Create Sprite from loaded resource
-            var cat = new Sprite(loader.resources["/app/img/cat.png"].texture);
-            cat.x = 96;
-            cat.y = 96;
-            cat.rotation = 0.5;
-            var cat2 = new Sprite(loader.resources["/app/img/cat.png"].texture);
+            //Create an optional alias called 'id' for all the texture atlas frame id textures
+            id = PIXI.loader.resources["/app/img/treasureHunter.json"].textures;
 
-            var line = new Sprite(loader.resources["/app/img/line.png"].texture);
-            var line1 = new Sprite(loader.resources["/app/img/line.png"].texture);
-            var line2 = new Sprite(loader.resources["/app/img/line.png"].texture);
-            line.position.set(width / 2, height / 2);
-            line1.position.set(width / 2, height / 2);
-            line2.position.set(width / 2, height / 2);
-            line.height = 400;
-            line1.height = 400;
-            line2.height = 400;
-            line1.rotation = 0.5;
-            line2.rotation = 0.75;
+            //There are 3 ways to make sprites from textures atlas frames
 
-            var texture = loader.resources["/app/img/tileset.png"].texture; //TextureCache["/app/img//tileset.png"];
+            //Dungeon
+            dungeon = new Sprite(id["dungeon.png"]);
+            stage.addChild(dungeon);
 
-            //Create a rectangle object that defines the position and
-            //size of the sub-image you want to extract from the texture
-            var rectangle = new Rectangle(96, 64, 32, 32);
-            //Tell the texture to use that rectangular section
-            texture.frame = rectangle;
-            //Create the sprite from the texture
-            var rocket = new Sprite(texture);
-            //Position the rocket sprite on the canvas
-            rocket.x = 232;
-            rocket.y = 232;
-            //Add the rocket to the stage
+            //Explorer
+            explorer = new Sprite(id["explorer.png"]);
+            explorer.x = 68;
+            //Center the explorer vertically
+            explorer.y = stage.height / 2 - explorer.height / 2;
+            //Set variables for movement
+            explorer.vx = 0;
+            explorer.vy = 0;
+            explorer.vr = 0;
+            stage.addChild(explorer);
 
-            stage.addChild(cat);
-            stage.addChild(cat2);
-            stage.addChild(line);
-            stage.addChild(line1);
-            stage.addChild(line2);
-            stage.addChild(rocket);
+            //Treasure
+            treasure = new Sprite(id["treasure.png"]);
+            treasure.x = stage.width - treasure.width - 48;
+            treasure.y = stage.height / 2 - treasure.height / 2;
+            stage.addChild(treasure);
 
-            console.log("Done loading");
+            //Exit door
+            door = new Sprite(id["door.png"]);
+            door.position.set(32, 0);
+            stage.addChild(door);
 
-            //Render the stage
+            //Blobs
+            var numberOfBlobs = 6,
+                spacing = 48,
+                xOffset = 150;
+            //Make as many blobs as there are 'numberOfBlobs'
+            for (var i = 0; i < numberOfBlobs; i++) {
+
+                //Make a blob
+                var blob = new Sprite(id["blob.png"]);
+
+                //Space each blob horizontally according to the 'spacing' value.
+                //'xOffset' determines the point from the left of the screen
+                //at which the first blob should be added.
+                var x = spacing * i + xOffset;
+
+                //Give the blob a random y position
+                //('randomInt' is a custom function - see below)
+                var y = randomInt(0, stage.height - blob.height);
+
+                //Set the blob's position
+                blob.x = x;
+                blob.y = y;
+
+                //Add the blob sprite to the stage
+                stage.addChild(blob);
+            }
+
+            //Render the stage   
             renderer.render(stage);
+
+            gameLoop();
+        }
+
+        var gameState = play;
+
+        function gameLoop() {
+            //Loop this function at 60frames per second
+            requestAnimationFrame(gameLoop);
+
+            gameState();
+
+            renderer.render(stage);
+        }
+
+        function play() {
+            explorer.vx = 1;
+            explorer.vy = 0;
+            explorer.vr = 0.1;
+
+            explorer.x += explorer.vx;
+            explorer.x += explorer.vy;
+            explorer.rotation += explorer.vr;
         }
     </script>
 </body>
