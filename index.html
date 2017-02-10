@@ -2,7 +2,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="user-scalabe=no, width=device-width, initial-scale=1, maximum-scale=1, minimun-scale=1" />
     <title>Evolution</title>
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
@@ -43,7 +43,9 @@
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>
-    <div ng-view></div>
+    <div class="container-fluid">
+        <div ng-view></div>
+    </div>
 </body>
 
 </html>

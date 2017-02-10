@@ -1,16 +1,21 @@
 ﻿var evolutionApp = angular.module("evolutionApp");
 
-evolutionApp.factory("DrawingEngine", function () {
+evolutionApp.factory("DrawingEngine", ["$q", function ($q) {
     var factory = {};
 
-    function getRandomColor() {
-        var hexChars = '0123456789ABCDEF';
-        var color = '0x';
-        for (var i = 0; i < 6; i++) {
-            color += hexChars[Math.floor(Math.random() * 16)];
+    factory.utils = {
+        getRandomColor: function () {
+            var letters = 'BCDEF'.split('');
+            var color = '0x';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * letters.length)];
+            }
+            return Number(color);
+        },
+        randomInt: function (min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
         }
-        return Number(color);
-    }
+    };
 
     factory.lines = {
         drawLine: function (renderer, stage, x, y, degrees, referenceAngle, length, color) {
@@ -19,15 +24,17 @@ evolutionApp.factory("DrawingEngine", function () {
             var radians = newAngle * Math.PI / 180;
 
             //Calculate final position
-            var xf = x + length * Math.cos(radians);
-            var yf = y + length * Math.sin(radians);
+            x = Math.floor(x);
+            y = Math.floor(y);
+            var xf = Math.floor(x + length * Math.cos(radians));
+            var yf = Math.floor(y + length * Math.sin(radians));
 
             if (!color) {
-                color = 0x000000;
+                color = 0xffffff;
             }
 
             var line = new Graphics();
-            line.lineStyle(1, color, 1);
+            line.lineStyle(2, color, 1);
             line.moveTo(x, y);
             line.lineTo(xf, yf);
             stage.addChild(line);
@@ -43,7 +50,39 @@ evolutionApp.factory("DrawingEngine", function () {
                 degrees: newAngle
             };
         },
-        drawChildren: function (
+        drawChildren: function (renderer, stage, line, lengthDelta, angleDelta) {
+            var anglesDelta = 30;
+            var waitTime = 10;
+            var color = factory.utils.getRandomColor();
+
+            return $q(function (resolve, reject) {
+                setTimeout(function () {
+                    var child1 = factory.lines.drawLine(
+                        renderer,
+                        stage,
+                        line.xFinal,
+                        line.yFinal,
+                        angleDelta,
+                        line.degrees,
+                        line.length - lengthDelta,
+                        color);
+                    setTimeout(function () {
+                        var child2 = factory.lines.drawLine(
+                            renderer,
+                            stage,
+                            line.xFinal,
+                            line.yFinal,
+                            -angleDelta,
+                            line.degrees,
+                            line.length - lengthDelta,
+                            color);
+                        resolve([child1, child2]);
+                    }, waitTime);
+
+                }, waitTime);
+            });
+        },
+        drawChildrenRecursive: function (
             renderer,
             stage,
             line,
@@ -54,6 +93,7 @@ evolutionApp.factory("DrawingEngine", function () {
             childrenAngle,
             anglesDelta) {
 
+            //alert(generations);
             if (generations > 0) {
                 var color = getRandomColor();
                 var index = totalGenerations - generations;
@@ -66,7 +106,7 @@ evolutionApp.factory("DrawingEngine", function () {
 
                 generations--;
 
-                var waitTime = 1;
+                var waitTime = 1000;
 
                 setTimeout(function () {
                     var child1 = factory.lines.drawLine(
@@ -94,7 +134,8 @@ evolutionApp.factory("DrawingEngine", function () {
                             renderer,
                             stage,
                             line.xFinal,
-                            line.yFinal, -genes[index],
+                            line.yFinal,
+                            -genes[index],
                             line.degrees,
                             line.length - lengthDelta,
                             color);
@@ -115,4 +156,4 @@ evolutionApp.factory("DrawingEngine", function () {
         }
     };
     return factory;
-});
+}]);

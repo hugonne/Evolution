@@ -1,2 +1,15 @@
 ﻿<div ng-controller="CanvasController">
+    <div class="row">
+        <div class="col-md-12">
+            <!--<img ng-src="{{data}}" />-->
+            <div class="btn-group" role="group" aria-label="...">
+                <button ng-click="evolve()" class="btn btn-success">Evolve</button>
+                <button ng-click="clearCanvas()" class="btn btn-warning">Clear</button>
+            </div>
+            <span ng-bind="generations"></span>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="row" id="canvasContainer"></div>
+    </div>
 </div>
