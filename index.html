@@ -4,12 +4,21 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Evolution</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+
+    <script src="scripts/pixi.min.js"></script>
+
+    <script src="scripts/angular.min.js"></script>
+    <script src="scripts/angular-route.min.js"></script>
+
+    <script src="app/app.js"></script>
+    <script src="app/controllers/canvasController.js"></script>
+    <script src="app/services/drawingEngine.js"></script>
 </head>
 
-<body>
+<body ng-app="evolutionApp">
     <nav class="navbar navbar-default">
         <div class="container-fluid">
             <!-- Brand and toggle get grouped for better mobile display -->
@@ -26,13 +35,15 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li><a href="app/randomEvolution.html">Random Evolution</a></li>
-                    <li><a href="app/treasureHunter.html">Treasure Hunter</a></li>
-                    <li><a href="app/pixiEvolution.html">Pixi Evolution</a></li>
+                    <li><a href="#!/canvas">Home</a></li>
+                    <li><a href="test/randomEvolution.html">Random Evolution</a></li>
+                    <li><a href="test/treasureHunter.html">Treasure Hunter</a></li>
+                    <li><a href="test/pixiEvolution.html">Pixi Evolution</a></li>
                 </ul>
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>
+    <div ng-view></div>
 </body>
 
 </html>
