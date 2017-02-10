@@ -39,9 +39,11 @@ function canvasController($scope, drawingEngine) {
     var childrenAngle = 30;
     var initialLength = 80;
     var lengthDelta = 6;
-    var angleVariation = 90;
-    $scope.generations = 1;
+    var angleVariation = 120;
     var background;
+
+    $scope.generations = 1;
+    $scope.working = false;
 
     function setup() {
         background = new Sprite(resources["/img/background.jpg"].texture);
@@ -69,6 +71,8 @@ function canvasController($scope, drawingEngine) {
     }
 
     $scope.evolve = function () {
+        $scope.working = true;
+
         var parentLines = $scope.lastGenerationLines;
 
         $scope.lastGenerationLines = [];
@@ -77,17 +81,23 @@ function canvasController($scope, drawingEngine) {
         var angleDelta = drawingEngine.utils.randomInt(1, angleVariation);
 
         angular.forEach(parentLines, function (line, key) {
-            drawingEngine.lines.drawChildren(renderer, stage, line, lengthDelta, angleDelta).then(function (data) {
-                $scope.lastGenerationLines = $scope.lastGenerationLines.concat(data);
-            });
+            drawingEngine.lines.drawChildren(renderer, stage, line, lengthDelta, angleDelta)
+                .then(function (data) {
+                    $scope.lastGenerationLines = $scope.lastGenerationLines.concat(data);
+                    $scope.working = false;
+                });
         });
         //renderer.view.toDataURL();
     };
 
     $scope.clearCanvas = function () {
+        $scope.working = true;
+
+        //Clear stage and add background again
         stage.removeChildren();
         stage.addChild(background);
         renderer.render(stage);
+
         //Initial vertical line
         $scope.lastGenerationLines = [];
         $scope.generations = 1;
@@ -99,5 +109,6 @@ function canvasController($scope, drawingEngine) {
             90,
             0,
             initialLength));
+        $scope.working = false;
     };
 }
