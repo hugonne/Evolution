@@ -1,16 +1,16 @@
 ﻿var evolutionApp = angular.module("evolutionApp");
 
-evolutionApp.factory("DrawingEngine", ["$q", function ($q) {
+evolutionApp.factory("DrawingEngine", ["$q", "$timeout", function ($q, $timeout) {
     var factory = {};
 
     factory.utils = {
         getRandomColor: function () {
             var letters = 'BCDEF'.split('');
-            var color = '0x';
+            var color = '#';
             for (var i = 0; i < 6; i++) {
                 color += letters[Math.floor(Math.random() * letters.length)];
             }
-            return Number(color);
+            return color;
         },
         randomInt: function (min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -18,10 +18,11 @@ evolutionApp.factory("DrawingEngine", ["$q", function ($q) {
     };
 
     factory.lines = {
-        drawLine: function (renderer, stage, x, y, degrees, referenceAngle, length, color) {
-            var Graphics = PIXI.Graphics;
+        drawLine: function (ctx, x, y, degrees, referenceAngle, length, color) {
             var newAngle = (referenceAngle - degrees) % 360;
             var radians = newAngle * Math.PI / 180;
+
+            console.log("Drawing!");
 
             //Calculate final position
             x = Math.floor(x);
@@ -30,16 +31,15 @@ evolutionApp.factory("DrawingEngine", ["$q", function ($q) {
             var yf = Math.floor(y + length * Math.sin(radians));
 
             if (!color) {
-                color = 0xffffff;
+                color = "#fff";
             }
 
-            var line = new Graphics();
-            line.lineStyle(2, color, 1);
-            line.moveTo(x, y);
-            line.lineTo(xf, yf);
-            stage.addChild(line);
-
-            renderer.render(stage);
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(xf, yf);
+            ctx.strokeStyle = color;
+            ctx.stroke();
 
             return {
                 xInitial: x,
@@ -50,26 +50,23 @@ evolutionApp.factory("DrawingEngine", ["$q", function ($q) {
                 degrees: newAngle
             };
         },
-        drawChildren: function (renderer, stage, line, lengthDelta, angleDelta) {
-            var anglesDelta = 30;
+        drawChildren: function (ctx, line, lengthDelta, angleDelta) {
             var waitTime = 10;
             var color = factory.utils.getRandomColor();
 
             return $q(function (resolve, reject) {
-                setTimeout(function () {
+                $timeout(function () {
                     var child1 = factory.lines.drawLine(
-                        renderer,
-                        stage,
+                        ctx,
                         line.xFinal,
                         line.yFinal,
                         angleDelta,
                         line.degrees,
                         line.length - lengthDelta,
                         color);
-                    setTimeout(function () {
+                    $timeout(function () {
                         var child2 = factory.lines.drawLine(
-                            renderer,
-                            stage,
+                            ctx,
                             line.xFinal,
                             line.yFinal,
                             -angleDelta,
@@ -78,21 +75,10 @@ evolutionApp.factory("DrawingEngine", ["$q", function ($q) {
                             color);
                         resolve([child1, child2]);
                     }, waitTime);
-
                 }, waitTime);
             });
         },
-        drawChildrenRecursive: function (
-            renderer,
-            stage,
-            line,
-            generations,
-            totalGenerations,
-            genes,
-            lengthDelta,
-            childrenAngle,
-            anglesDelta) {
-
+        drawManyChildern: function (ctx, line, generations, totalGenerations, genes, lengthDelta, childrenAngle, anglesDelta) {
             //alert(generations);
             if (generations > 0) {
                 var color = getRandomColor();
@@ -110,17 +96,15 @@ evolutionApp.factory("DrawingEngine", ["$q", function ($q) {
 
                 setTimeout(function () {
                     var child1 = factory.lines.drawLine(
-                        renderer,
-                        stage,
+                        ctx,
                         line.xFinal,
                         line.yFinal,
                         genes[index],
                         line.degrees,
                         line.length - lengthDelta,
                         color);
-                    factory.lines.drawChildren(
-                        renderer,
-                        stage,
+                    factory.lines.drawManyChildern(
+                        ctx,
                         child1,
                         generations,
                         totalGenerations,
@@ -131,17 +115,15 @@ evolutionApp.factory("DrawingEngine", ["$q", function ($q) {
 
                     setTimeout(function () {
                         var child2 = factory.lines.drawLine(
-                            renderer,
-                            stage,
+                            ctx,
                             line.xFinal,
                             line.yFinal,
                             -genes[index],
                             line.degrees,
                             line.length - lengthDelta,
                             color);
-                        factory.lines.drawChildren(
-                            renderer,
-                            stage,
+                        factory.lines.drawManyChildern(
+                            ctx,
                             child2,
                             generations,
                             totalGenerations,

@@ -5,9 +5,9 @@ evolutionApp.config(["$locationProvider", "$routeProvider",
         $locationProvider.hashPrefix('!');
 
         $routeProvider.
-            when("/canvas", {
-                templateUrl: 'app/views/canvas.html'
+            when("/home", {
+                templateUrl: 'app/views/home.html'
             }).
-            otherwise('/canvas');
+            otherwise('/home');
     }
 ]);

@@ -1,0 +1,13 @@
+﻿<div class="row">
+    <div class="col-md-12">
+        <!--<img ng-src="{{data}}" />-->
+        <div class="btn-group" role="group" aria-label="...">
+            <button ng-click="evolve()" class="btn btn-success" ng-disabled="working">Evolve</button>
+            <button ng-click="clearCanvas()" class="btn btn-warning" ng-disabled="working">Clear</button>
+        </div>
+        <span ng-bind="generations"></span>
+    </div>
+    <div class="col-md-12">
+        <canvas ng-attr-id="{{id}}" ng-attr-width="{{width}}" ng-attr-height="{{height}}"></canvas>
+    </div>
+</div>
