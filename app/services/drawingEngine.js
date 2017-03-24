@@ -5,8 +5,8 @@ evolutionApp.factory("DrawingEngine", ["$q", "$timeout", function ($q, $timeout)
 
     factory.utils = {
         getRandomColor: function () {
-            var letters = 'BCDEF'.split('');
-            var color = '#';
+            var letters = "BCDEF".split("");
+            var color = "#";
             for (var i = 0; i < 6; i++) {
                 color += letters[Math.floor(Math.random() * letters.length)];
             }
@@ -21,8 +21,6 @@ evolutionApp.factory("DrawingEngine", ["$q", "$timeout", function ($q, $timeout)
         drawLine: function (ctx, x, y, degrees, referenceAngle, length, color) {
             var newAngle = (referenceAngle - degrees) % 360;
             var radians = newAngle * Math.PI / 180;
-
-            console.log("Drawing!");
 
             //Calculate final position
             x = Math.floor(x);
@@ -62,7 +60,7 @@ evolutionApp.factory("DrawingEngine", ["$q", "$timeout", function ($q, $timeout)
                         line.yFinal,
                         angleDelta,
                         line.degrees,
-                        line.length - lengthDelta,
+                        Math.round(line.length * lengthDelta),
                         color);
                     $timeout(function () {
                         var child2 = factory.lines.drawLine(
@@ -71,7 +69,7 @@ evolutionApp.factory("DrawingEngine", ["$q", "$timeout", function ($q, $timeout)
                             line.yFinal,
                             -angleDelta,
                             line.degrees,
-                            line.length - lengthDelta,
+                            Math.round(line.length * lengthDelta),
                             color);
                         resolve([child1, child2]);
                     }, waitTime);

@@ -1,11 +1,24 @@
 ﻿body {
     font-family: 'Open Sans', sans-serif;
 }
+
 canvas {
-    background:url(/img/background.jpg);
+    background: url(/img/background.jpg);
     background-repeat: no-repeat;
     background-size: 100% 100%;
 }
+
+    canvas.bg1 {
+        background: url(/img/background.jpg);
+    }
+
+    canvas.bg2 {
+        background: url(/img/background2.jpg);
+    }
+
+    canvas.bg3 {
+        background: url(/img/background3.jpg);
+    }
 /*html {
     height: 100%
 }*/

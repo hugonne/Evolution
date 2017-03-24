@@ -5,7 +5,10 @@ evolutionApp.directive("evCanvas", ["DrawingEngine", function () {
         restrict: "E",
         templateUrl: "app/directives/canvasTemplate.html",
         scope: {
-            id: "="
+            id: "=",
+            bg: "=",
+            width: "=",
+            height: "="
         },
         controller: ["$scope", "$timeout", "DrawingEngine", function ($scope, $timeout, drawingEngine) {
             var background;
@@ -25,17 +28,17 @@ evolutionApp.directive("evCanvas", ["DrawingEngine", function () {
                 $scope.lastGenerationLines.push(drawingEngine.lines.drawLine(
                     ctx,
                     center.x,
-                    $scope.height * 2 / 3,
+                    $scope.height -50,
                     90,
                     0,
                     initialLength));
             };
 
             //Canvas setup
-            var xOffset = 0.85;
-            var yOffset = 0.85;
-            $scope.width = Math.round(document.body.clientWidth * xOffset);
-            $scope.height = Math.round(document.body.clientHeight * yOffset);
+            //var xOffset = 0.85;
+            //var yOffset = 0.85;
+            //$scope.width = Math.round(document.body.clientWidth * xOffset);
+            //$scope.height = Math.round(document.body.clientHeight * yOffset);
             var center = {
                 x: Math.round($scope.width / 2),
                 y: Math.round($scope.height / 2)
@@ -47,9 +50,10 @@ evolutionApp.directive("evCanvas", ["DrawingEngine", function () {
 
             //Init variables (genes)
             var childrenAngle = 30;
-            var initialLength = 80;
-            var lengthDelta = 6;
+            var initialLength = 200;
+            var lengthDelta = 0.66;
             var angleVariation = 100;
+            var angleDelta = 45;
 
             //Scope initialization
             $scope.generations = 1;
@@ -62,17 +66,17 @@ evolutionApp.directive("evCanvas", ["DrawingEngine", function () {
                 var parentLines = $scope.lastGenerationLines;
 
                 $scope.lastGenerationLines = [];
-                $scope.generations++;
 
-                var angleDelta = drawingEngine.utils.randomInt(1, angleVariation);
+                //angleDelta = drawingEngine.utils.randomInt(1, angleVariation);
 
                 angular.forEach(parentLines, function (line, key) {
-                    drawingEngine.lines.drawChildren(ctx, line, lengthDelta, angleDelta)
+                    drawingEngine.lines.drawChildren(ctx, line, $scope.generations === 1 ? 1 : lengthDelta, angleDelta)
                         .then(function (data) {
                             $scope.lastGenerationLines = $scope.lastGenerationLines.concat(data);
                             $scope.working = false;
                         });
                 });
+                $scope.generations++;
                 //renderer.view.toDataURL();
             };
 
