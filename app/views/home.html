@@ -1,4 +1,15 @@
 ﻿<div ng-controller="HomeController">
-    <ev-canvas id="'mainCanvas'" bg="3" width="width" height="height"></ev-canvas>
-    <ev-canvas id="'mainCanvas2'" bg="2" width="800" height="600"></ev-canvas>
+    <div class="row">
+        <div class="col-md-2">
+            
+        </div>
+        <div class="col-md-10" id="worldCanvasContainer" style="height: 90%">
+            <ev-world-canvas id="'worldCanvas'" 
+                             bg="3"
+                             width="worldCanvasWidth" 
+                             height="worldCanvasHeight"></ev-world-canvas>
+        </div>
+    </div>
+    <!--<ev-organism-canvas id="'mainCanvas'" bg="2" width="width" height="height"></ev-organism-canvas>-->
+    <!--<ev-organism-canvas id="'mainCanvas2'" bg="2" width="800" height="600"></ev-organism-canvas>-->
 </div>
