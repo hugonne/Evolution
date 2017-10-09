@@ -1,0 +1,1 @@
+﻿var game = new Game(12);
