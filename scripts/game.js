@@ -6,8 +6,8 @@
         x: Math.round(this._width / 2),
         y: Math.round(this._height / 2)
     };
-    this._creatureWidth = 32;
-    this._creatureHeight = 32;
+    this._creatureWidth = 52;
+    this._creatureHeight = 52;
     this._totalCreatures = initialCreatures;
 
     //Determine the scale to use for all elements
@@ -20,7 +20,7 @@
     document.body.appendChild(this.app.view);
 
     //var build = this.build;
-    PIXI.loader.add("/img/sprites.json").load(this.build.bind(this));
+    PIXI.loader.add("/img/creatures.json").load(this.build.bind(this));
 };
 
 Game.prototype = {
@@ -28,19 +28,18 @@ Game.prototype = {
         //this.setupBg();
 
         //Add creatures
+        this.app.stage.addChild(this.createCreature("c831"));
         this.app.stage.addChild(this.createCreature("c1"));
-        this.app.stage.addChild(this.createCreature("c1"));
-        this.app.stage.addChild(this.createCreature("c1"));
-        this.app.stage.addChild(this.createCreature("c2"));
-        this.app.stage.addChild(this.createCreature("c2"));
-        this.app.stage.addChild(this.createCreature("c2"));
-        this.app.stage.addChild(this.createCreature("c3"));
-        this.app.stage.addChild(this.createCreature("c3"));
-        this.app.stage.addChild(this.createCreature("c3"));
+        //this.app.stage.addChild(this.createCreature("c2"));
+        //this.app.stage.addChild(this.createCreature("c2"));
+        //this.app.stage.addChild(this.createCreature("c2"));
+        //this.app.stage.addChild(this.createCreature("c3"));
+        //this.app.stage.addChild(this.createCreature("c3"));
+        //this.app.stage.addChild(this.createCreature("c3"));
 
-        //for (var c = 0; c < this._totalCreatures; c++) {
-        //    this.app.stage.addChild(this.createRandomCreature());
-        //}
+        for (var c = 0; c < this._totalCreatures; c++) {
+            this.app.stage.addChild(this.createRandomCreature());
+        }
 
         //Game loop
         this.app.ticker.add(function () {
@@ -49,14 +48,14 @@ Game.prototype = {
                 if (creature.genes) {
                     //Move the creature
                     this.moveCreature(creature);
-                    this.app.stage.children.forEach(function(otherCreature) {
-                        if (creature !== otherCreature) {
-                            if (collisionDetected(creature, otherCreature)) {
-                                //Evolve according to collision
-                                this.evolveWorld(creature, otherCreature);
-                            }
-                        }
-                    }.bind(this));
+                    //this.app.stage.children.forEach(function(otherCreature) {
+                    //    if (creature !== otherCreature) {
+                    //        if (collisionDetected(creature, otherCreature)) {
+                    //            //Evolve according to collision
+                    //            this.evolveWorld(creature, otherCreature);
+                    //        }
+                    //    }
+                    //}.bind(this));
                 }
             }.bind(this));
         }.bind(this));
@@ -116,9 +115,9 @@ Game.prototype = {
         }
     },
     createCreature: function (type, x, y) {
-        if (type !== "c1" && type !== "c2" && type !== "c3") {
-            throw "Invalid creature type";
-        }
+        //if (type !== "c1" && type !== "c2" && type !== "c3") {
+        //    throw "Invalid creature type";
+        //}
 
         var texture = PIXI.utils.TextureCache[type];
         var creature = new PIXI.Sprite(texture);
@@ -153,9 +152,10 @@ Game.prototype = {
         return creature; 
     },
     createRandomCreature: function (x, y) {
-        var creaturesInSprite = 3;
+        var creaturesInSprite = 31 * 27 - 6;
         //Get random creature from Sprite
         var creatureName = "c" + randomInt(1, creaturesInSprite);
+        console.log(creatureName);
 
         var texture = PIXI.utils.TextureCache[creatureName];
         var creature = new PIXI.Sprite(texture);
