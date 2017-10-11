@@ -1,4 +1,6 @@
-﻿var Game = function (initialCreatures) {
+﻿var Game = function (worldData) {
+    this.worldData = worldData;
+
     //Set with and height of scene
     this._width = document.body.clientWidth;
     this._height = document.body.clientHeight;
@@ -6,9 +8,6 @@
         x: Math.round(this._width / 2),
         y: Math.round(this._height / 2)
     };
-    this._creatureWidth = 52;
-    this._creatureHeight = 52;
-    this._totalCreatures = initialCreatures;
 
     //Determine the scale to use for all elements
     this._scale = this._width / 1920;
@@ -16,11 +15,11 @@
         this._scale = this._height / 1080;
     }
 
-    this.app = new PIXI.Application(this._width, this._height, { backgroundColor: 0x1099bb });
+    this.app = new window.PIXI.Application(this._width, this._height, { backgroundColor: 0x1099bb });
     document.body.appendChild(this.app.view);
 
     //var build = this.build;
-    PIXI.loader.add("/img/creatures.json").load(this.build.bind(this));
+    window.PIXI.loader.add("/img/creatures.json").load(this.build.bind(this));
 };
 
 Game.prototype = {
@@ -28,18 +27,12 @@ Game.prototype = {
         //this.setupBg();
 
         //Add creatures
-        this.app.stage.addChild(this.createCreature("c831"));
-        this.app.stage.addChild(this.createCreature("c1"));
-        //this.app.stage.addChild(this.createCreature("c2"));
-        //this.app.stage.addChild(this.createCreature("c2"));
-        //this.app.stage.addChild(this.createCreature("c2"));
-        //this.app.stage.addChild(this.createCreature("c3"));
-        //this.app.stage.addChild(this.createCreature("c3"));
-        //this.app.stage.addChild(this.createCreature("c3"));
-
-        for (var c = 0; c < this._totalCreatures; c++) {
-            this.app.stage.addChild(this.createRandomCreature());
-        }
+        this.worldData.baseSpecies.breeders.forEach(function(species) {
+            this.app.stage.addChild(this.createCreature(species, "breeder"));
+        }.bind(this));
+        this.worldData.baseSpecies.hunters.forEach(function (species) {
+            this.app.stage.addChild(this.createCreature(species, "hunter"));
+        }.bind(this));
 
         //Game loop
         this.app.ticker.add(function () {
@@ -62,7 +55,7 @@ Game.prototype = {
     },
     setupBg: function () {
         //Create the texture
-        var bg = PIXI.Sprite.fromImage("/img/background3.png");
+        var bg = window.PIXI.Sprite.fromImage("/img/background3.png");
         //Position the background in the center
         bg.anchor.set(0.5);
         bg.x = this._center.x;
@@ -114,26 +107,27 @@ Game.prototype = {
             }
         }
     },
-    createCreature: function (type, x, y) {
-        //if (type !== "c1" && type !== "c2" && type !== "c3") {
-        //    throw "Invalid creature type";
-        //}
+    createCreature: function (species, family, x, y) {
+        if (family !== "breeder" && family !== "hunter") {
+            throw "Invalid family. Must be 'breeder' or 'hunter'";
+        }
 
-        var texture = PIXI.utils.TextureCache[type];
-        var creature = new PIXI.Sprite(texture);
+        var texture = window.PIXI.utils.TextureCache[species];
+        var creature = new window.PIXI.Sprite(texture);
 
         if (!x) {
-            x = randomInt(0, this._width - this._creatureWidth);
+            x = randomInt(0, this._width - this.worldData.creatureWidth);
         }
         if (!y) {
-            y = randomInt(0, this._height - this._creatureHeight);
+            y = randomInt(0, this._height - this.worldData.creatureHeight);
         }
         creature.x = x;
         creature.y = y;
 
         //Creature genes
         creature.genes = {};
-        creature.type = type;
+        creature.genes.species = species;
+        creature.genes.family = family;
         creature.genes.canChangeDirection = randomBool();
         creature.genes.speedX = randomFloat(-2, 2);
         creature.genes.speedY = randomFloat(-2, 2);
@@ -154,17 +148,17 @@ Game.prototype = {
     createRandomCreature: function (x, y) {
         var creaturesInSprite = 31 * 27 - 6;
         //Get random creature from Sprite
-        var creatureName = "c" + randomInt(1, creaturesInSprite);
-        console.log(creatureName);
+        var species = "c" + randomInt(1, creaturesInSprite);
+        console.log(species);
 
-        var texture = PIXI.utils.TextureCache[creatureName];
-        var creature = new PIXI.Sprite(texture);
+        var texture = window.PIXI.utils.TextureCache[species];
+        var creature = new window.PIXI.Sprite(texture);
 
         if (!x) {
-            x = randomInt(0, this._width - this._creatureWidth);
+            x = randomInt(0, this._width - this.worldData.creatureWidth);
         }
         if (!y) {
-            y = randomInt(0, this._height - this._creatureHeight);
+            y = randomInt(0, this._height - this.worldData.creatureHeight);
         }
         creature.x = x;
         creature.y = y;
@@ -190,38 +184,14 @@ Game.prototype = {
     },
     moveCreature: function(creature) {
         if (creature.x + creature.genes.speedX <= 0 ||
-            creature.x + creature.genes.speedX >= this._width - this._creatureWidth) {
+            creature.x + creature.genes.speedX >= this._width - this.worldData.creatureWidth) {
             creature.genes.speedX *= -1;
         }
         if (creature.y + creature.genes.speedY <= 0 ||
-            creature.y + creature.genes.speedY >= this._height - this._creatureHeight) {
+            creature.y + creature.genes.speedY >= this._height - this.worldData.creatureHeight) {
             creature.genes.speedY *= -1;
         }
         creature.x += creature.genes.speedX;
         creature.y += creature.genes.speedY;
     }
 };
-
-var randomInt = function (min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
-var randomFloat = function (min, max, decimalPlaces) {
-    if (decimalPlaces) {
-        return Math.round(Math.random() * (max - min) + min, decimalPlaces);
-    }
-    return Math.random() * (max - min) + min;
-};
-
-var randomBool = function (){
-    return Math.random() > 0.5;
-}
-
-var collisionDetected = function (r1, r2) {
-    //Use half the value of width and height so objects have to bump more
-    //into each other to detect a collision.
-    return !(r2.x > (r1.x + r1.width / 2) ||
-        (r2.x + r2.width / 2) < r1.x ||
-        r2.y > (r1.y + r1.height / 2) ||
-        (r2.y + r2.height / 2) < r1.y);
-}

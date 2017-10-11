@@ -1,0 +1,19 @@
+﻿{
+  "creatureHeight": 52,
+  "creatureWidth": 52,
+  "kingdoms": [],
+  "families": {
+    "breeders": {
+      "maxBreedChance": 0.5,
+      "maxKillChance": 0.2
+    },
+    "hunters": {
+      "maxBreedChance": 0.2,
+      "maxKillChance": 0.5
+    }
+  },
+  "baseSpecies": {
+    "breeders": [ "c135", "c136", "c137", "c138" ],
+    "hunters": [ "c250", "c251", "c252", "c253" ]
+  } 
+}
