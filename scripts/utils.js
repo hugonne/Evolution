@@ -2,10 +2,7 @@
     return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-var randomFloat = function (min, max, decimalPlaces) {
-    if (decimalPlaces) {
-        return Math.round(Math.random() * (max - min) + min, decimalPlaces);
-    }
+var randomFloat = function (min, max) {
     return Math.random() * (max - min) + min;
 };
 

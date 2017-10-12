@@ -1,4 +1,11 @@
-﻿var Game = function (worldData) {
+﻿// ReSharper disable PossiblyUnassignedProperty
+var pixiUtils = window.PIXI.utils;
+var pixiSprite = window.PIXI.Sprite;
+var pixiApplication = window.PIXI.Application;
+var pixiLoader = window.PIXI.loader;
+// ReSharper restore PossiblyUnassignedProperty
+
+var Game = function (worldData) {
     this.worldData = worldData;
 
     //Set with and height of scene
@@ -15,23 +22,23 @@
         this._scale = this._height / 1080;
     }
 
-    this.app = new window.PIXI.Application(this._width, this._height, { backgroundColor: 0x1099bb });
+    this.app = new pixiApplication(this._width, this._height, { backgroundColor: 0x1099bb });
     document.body.appendChild(this.app.view);
 
     //var build = this.build;
-    window.PIXI.loader.add("/img/creatures.json").load(this.build.bind(this));
+    pixiLoader.add("/img/creatures.json").load(this.build.bind(this));
 };
 
 Game.prototype = {
     build: function () {
-        //this.setupBg();
+        //this.app.stage.addChild(this.createRandomCreature("breeder"));
 
         //Add creatures
         this.worldData.baseSpecies.breeders.forEach(function(species) {
-            this.app.stage.addChild(this.createCreature(species, "breeder"));
+            this.app.stage.addChild(this.createCreature(species, "breeders"));
         }.bind(this));
         this.worldData.baseSpecies.hunters.forEach(function (species) {
-            this.app.stage.addChild(this.createCreature(species, "hunter"));
+            this.app.stage.addChild(this.createCreature(species, "hunters"));
         }.bind(this));
 
         //Game loop
@@ -41,21 +48,21 @@ Game.prototype = {
                 if (creature.genes) {
                     //Move the creature
                     this.moveCreature(creature);
-                    //this.app.stage.children.forEach(function(otherCreature) {
-                    //    if (creature !== otherCreature) {
-                    //        if (collisionDetected(creature, otherCreature)) {
-                    //            //Evolve according to collision
-                    //            this.evolveWorld(creature, otherCreature);
-                    //        }
-                    //    }
-                    //}.bind(this));
+                    this.app.stage.children.forEach(function(otherCreature) {
+                        if (creature !== otherCreature) {
+                            if (collisionDetected(creature, otherCreature)) {
+                                //Evolve according to collision
+                                this.evolveWorld(creature, otherCreature);
+                            }
+                        }
+                    }.bind(this));
                 }
             }.bind(this));
         }.bind(this));
     },
     setupBg: function () {
         //Create the texture
-        var bg = window.PIXI.Sprite.fromImage("/img/background3.png");
+        var bg = pixiSprite.fromImage("/img/background3.png");
         //Position the background in the center
         bg.anchor.set(0.5);
         bg.x = this._center.x;
@@ -65,55 +72,13 @@ Game.prototype = {
         //Mount onto the stage
         this.app.stage.addChild(bg);
     },
-    evolveWorld: function (creatureOne, creatureTwo) {
-        //Same type creatures breed
-        if (creatureOne.type === creatureTwo.type) {
-            this.app.stage.addChild(this.createCreature(creatureOne.type));
-        }
-        //c1 vs. c2: c1 survives
-        else if ((creatureOne.type === "c1" && creatureTwo.type === "c2") ||
-            (creatureOne.type === "c2" && creatureTwo.type === "c1")) {
-            if (creatureOne.type === "c2") {
-                this.app.stage.removeChild(creatureOne);
-            } else {
-                this.app.stage.removeChild(creatureTwo);
-            }
-        }
-        //c1 vs. c2: c1 survives
-        else if ((creatureOne.type === "c1" && creatureTwo.type === "c2") ||
-            (creatureOne.type === "c2" && creatureTwo.type === "c1")) {
-            if (creatureOne.type === "c2") {
-                this.app.stage.removeChild(creatureOne);
-            } else {
-                this.app.stage.removeChild(creatureTwo);
-            }
-        }
-        //c2 vs. c3: c2 survives
-        else if ((creatureOne.type === "c2" && creatureTwo.type === "c3") ||
-            (creatureOne.type === "c3" && creatureTwo.type === "c2")) {
-            if (creatureOne.type === "c3") {
-                this.app.stage.removeChild(creatureOne);
-            } else {
-                this.app.stage.removeChild(creatureTwo);
-            }
-        }
-        //c3 vs. c1: c3 survives
-        else if ((creatureOne.type === "c3" && creatureTwo.type === "c1") ||
-            (creatureOne.type === "c1" && creatureTwo.type === "c3")) {
-            if (creatureOne.type === "c1") {
-                this.app.stage.removeChild(creatureOne);
-            } else {
-                this.app.stage.removeChild(creatureTwo);
-            }
-        }
-    },
     createCreature: function (species, family, x, y) {
-        if (family !== "breeder" && family !== "hunter") {
-            throw "Invalid family. Must be 'breeder' or 'hunter'";
+        if (family !== "breeders" && family !== "hunters") {
+            throw "Invalid family. Must be 'breeders' or 'hunters'";
         }
 
-        var texture = window.PIXI.utils.TextureCache[species];
-        var creature = new window.PIXI.Sprite(texture);
+        var texture = pixiUtils.TextureCache[species];
+        var creature = new pixiSprite(texture);
 
         if (!x) {
             x = randomInt(0, this._width - this.worldData.creatureWidth);
@@ -129,8 +94,12 @@ Game.prototype = {
         creature.genes.species = species;
         creature.genes.family = family;
         creature.genes.canChangeDirection = randomBool();
-        creature.genes.speedX = randomFloat(-2, 2);
-        creature.genes.speedY = randomFloat(-2, 2);
+        creature.genes.speedX =
+            randomFloat(-this.worldData.families[family].maxSpeed, this.worldData.families[family].maxSpeed);
+        creature.genes.speedY =
+            randomFloat(-this.worldData.families[family].maxSpeed, this.worldData.families[family].maxSpeed);
+        creature.genes.breedChance = randomFloat(0, this.worldData.families[family].maxBreedChance);
+        creature.genes.killChance = randomFloat(0, this.worldData.families[family].maxKillChance);
 
         //Behavior according to genes
         if (creature.genes.canChangeDirection) {
@@ -143,44 +112,100 @@ Game.prototype = {
             creature.genes.changeDirection();
         }
 
-        return creature; 
-    },
-    createRandomCreature: function (x, y) {
-        var creaturesInSprite = 31 * 27 - 6;
-        //Get random creature from Sprite
-        var species = "c" + randomInt(1, creaturesInSprite);
-        console.log(species);
-
-        var texture = window.PIXI.utils.TextureCache[species];
-        var creature = new window.PIXI.Sprite(texture);
-
-        if (!x) {
-            x = randomInt(0, this._width - this.worldData.creatureWidth);
-        }
-        if (!y) {
-            y = randomInt(0, this._height - this.worldData.creatureHeight);
-        }
-        creature.x = x;
-        creature.y = y;
-
-        //Creature genes
-        creature.genes = {};
-        creature.genes.canChangeDirection = randomBool();
-        creature.genes.speedX = randomFloat(-2, 2);
-        creature.genes.speedY = randomFloat(-2, 2);
-
-        //Behavior according to genes
-        if (creature.genes.canChangeDirection) {
-            creature.genes.changeDirection = function () {
-                creature.genes.speedX *= randomBool() ? -1 : 1;
-                creature.genes.speedY *= randomBool() ? -1 : 1;
-                setTimeout(creature.genes.changeDirection, creature.genes.changeDirectionTime);
-            }
-            creature.genes.changeDirectionTime = randomInt(1000, 5000);
-            creature.genes.changeDirection();
-        }
-
+        console.log(creature.genes.species +
+            " created: B" +
+            creature.genes.breedChance +
+            " - K" +
+            creature.genes.killChance);
         return creature;
+    },
+    createRandomCreature: function (family, x, y) {
+        if (family !== "breeders" && family !== "hunters") {
+            throw "Invalid family. Must be 'breeders' or 'hunters'";
+        }
+
+        //Get random creature from Sprite
+        var species = this.worldData.species[family][randomInt(0, this.worldData.species[family].length - 1)];
+
+        return this.createCreature(species, family, x, y);
+    },
+    evolveWorld: function (creatureOne, creatureTwo) {
+        //this.app.stage.removeChild(creatureOne);
+        //this.app.stage.addChild(createRandomCreature("breeders"));
+
+        var getFamily = function(familyOne, familyTwo) {
+            //Same family creatures produce breed into that family.
+            //Different family creatures breed into a random family.
+            if (familyOne === familyTwo) {
+                return creatureOne.genes.family;
+            }
+            var isBreeder = randomBool();
+            return isBreeder ? "breders" : "hunters";
+        }
+
+        //Determine what each creature plans to do
+        var creatureOneActionFactor = randomFloat(0, 1);
+        var creatureTwoActionFactor = randomFloat(0, 1);
+        console.log(creatureOne.genes.species +
+            ": " +
+            creatureOneActionFactor +
+            " - " +
+            creatureTwo.genes.species +
+            ": " +
+            creatureTwoActionFactor);
+        var shouldCreatureOneKill = false;
+        var shouldCreatureTwoKill = false;
+
+        //Creature one and two want to breed
+        if (creatureOneActionFactor < creatureOne.genes.breedChance && creatureTwoActionFactor < creatureTwo.genes.breedChance) {
+            var family = getFamily(creatureOne.genes.family, creatureTwo.genes.family);
+            var newCreature = createRandomCreature(family);
+            this.app.stage.addChild(newCreature);
+            console.log(creatureOne.genes.species +
+                "(" +
+                creatureOne.genes.family +
+                ") breeds with " +
+                creatureTwo.genes.species +
+                "(" +
+                creatureTwo.genes.family +
+                ") producing " +
+                newCreature.genes.species +
+                "(" +
+                newCreature.genes.family +
+                ")");
+            return;
+        }
+        if (creatureOneActionFactor < creatureOne.genes.killChance + creatureOne.genes.breedChance) {
+            //Creature one wants to kill
+            shouldCreatureOneKill = true;
+        }
+        if (creatureTwoActionFactor < creatureTwo.genes.killChance + creatureTwo.genes.breedChance) {
+            //Creature two wants to kill
+            shouldCreatureTwoKill = true;
+        }
+        //Remove killed creatures
+        if (shouldCreatureOneKill) {
+            console.log(creatureOne.genes.species +
+                "(" +
+                creatureOne.genes.family +
+                ") kills " +
+                creatureTwo.genes.species +
+                "(" +
+                creatureTwo.genes.family +
+                ")");
+            this.app.stage.removeChild(creatureTwo);
+        }
+        if (shouldCreatureTwoKill) {
+            console.log(creatureTwo.genes.species +
+                "(" +
+                creatureTwo.genes.family +
+                ") kills " +
+                creatureOne.genes.species +
+                "(" +
+                creatureOne.genes.family +
+                ")");
+            this.app.stage.removeChild(creatureOne);
+        }
     },
     moveCreature: function(creature) {
         if (creature.x + creature.genes.speedX <= 0 ||
