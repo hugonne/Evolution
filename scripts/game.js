@@ -113,7 +113,9 @@ Game.prototype = {
         }
 
         console.log(creature.genes.species +
-            " created: B" +
+            "(" +
+            family +
+            ") created: B" +
             creature.genes.breedChance +
             " - K" +
             creature.genes.killChance);
@@ -140,26 +142,52 @@ Game.prototype = {
                 return creatureOne.genes.family;
             }
             var isBreeder = randomBool();
-            return isBreeder ? "breders" : "hunters";
+            return isBreeder ? "breeders" : "hunters";
         }
 
         //Determine what each creature plans to do
         var creatureOneActionFactor = randomFloat(0, 1);
         var creatureTwoActionFactor = randomFloat(0, 1);
+        var creatureOneWantsToBreed = false;
+        var creatureTwoWantsToBreed = false;
+        var creatureOneWantsToKill = false;
+        var creatureTwoWantsToKill = false;
+
+        //Figure out what each creature wants to do
+        if (creatureOneActionFactor < creatureOne.genes.killChance) {
+            creatureOneWantsToKill= true;
+        }
+        else if (creatureOneActionFactor < (creatureOne.genes.killChance + creatureOne.genes.breedChance)) {
+            creatureOneWantsToBreed = true;
+        }
+        if (creatureTwoActionFactor < creatureTwo.genes.killChance) {
+            creatureTwoWantsToKill = true;
+        }
+        else if (creatureOneActionFactor < (creatureOne.genes.killChance + creatureOne.genes.breedChance)) {
+            creatureTwoWantsToBreed = true;
+        }
+
         console.log(creatureOne.genes.species +
             ": " +
             creatureOneActionFactor +
+            " B:" +
+            creatureOneWantsToBreed +
+            " K:" +
+            creatureOneWantsToKill +
             " - " +
             creatureTwo.genes.species +
             ": " +
-            creatureTwoActionFactor);
-        var shouldCreatureOneKill = false;
-        var shouldCreatureTwoKill = false;
+            creatureTwoActionFactor +
+            " B:" +
+            creatureTwoWantsToBreed +
+            " K:" +
+            creatureTwoWantsToKill);
 
-        //Creature one and two want to breed
-        if (creatureOneActionFactor < creatureOne.genes.breedChance && creatureTwoActionFactor < creatureTwo.genes.breedChance) {
+        //React based on what each creature wants to do
+        //Both creatures want to breed, then breed
+        if (creatureOneWantsToBreed && creatureTwoWantsToBreed) {
             var family = getFamily(creatureOne.genes.family, creatureTwo.genes.family);
-            var newCreature = createRandomCreature(family);
+            var newCreature = this.createRandomCreature(family);
             this.app.stage.addChild(newCreature);
             console.log(creatureOne.genes.species +
                 "(" +
@@ -175,16 +203,8 @@ Game.prototype = {
                 ")");
             return;
         }
-        if (creatureOneActionFactor < creatureOne.genes.killChance + creatureOne.genes.breedChance) {
-            //Creature one wants to kill
-            shouldCreatureOneKill = true;
-        }
-        if (creatureTwoActionFactor < creatureTwo.genes.killChance + creatureTwo.genes.breedChance) {
-            //Creature two wants to kill
-            shouldCreatureTwoKill = true;
-        }
-        //Remove killed creatures
-        if (shouldCreatureOneKill) {
+        //One of the creatures wants to kill, then kill the other
+        if (creatureOneWantsToKill) {
             console.log(creatureOne.genes.species +
                 "(" +
                 creatureOne.genes.family +
@@ -195,7 +215,7 @@ Game.prototype = {
                 ")");
             this.app.stage.removeChild(creatureTwo);
         }
-        if (shouldCreatureTwoKill) {
+        if (creatureTwoWantsToKill) {
             console.log(creatureTwo.genes.species +
                 "(" +
                 creatureTwo.genes.family +

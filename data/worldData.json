@@ -4,12 +4,12 @@
   "kingdoms": [],
   "families": {
     "breeders": {
-      "maxBreedChance": 0.5,
+      "maxBreedChance": 0.6,
       "maxKillChance": 0.2,
       "maxSpeed": 1.5
     },
     "hunters": {
-      "maxBreedChance": 0.2,
+      "maxBreedChance": 0.1,
       "maxKillChance": 0.5,
       "maxSpeed": 1.5
     }
